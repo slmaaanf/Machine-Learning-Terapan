@@ -82,8 +82,14 @@ Untuk mengevaluasi model, kita menggunakan beberapa metrik untuk mengukur kinerj
 - Regresi Linier: Metrik yang digunakan adalah MSE (Mean Squared Error) untuk mengukur seberapa akurat prediksi kandungan gizi (seperti kalori) oleh model berdasarkan fitur lainnya. MSE memberikan gambaran tentang rata-rata kuadrat kesalahan antara nilai prediksi dan nilai aktual, dengan nilai yang lebih kecil menunjukkan model yang lebih akurat.
 
 **Hasil Evaluasi**:
-- Regresi Linier:Hasil evaluasi model regresi menggunakan Mean Squared Error (MSE) menunjukkan nilai sebesar 0.157, yang menggambarkan rata-rata kuadrat kesalahan yang relatif kecil dalam memprediksi kandungan kalori makanan berdasarkan data yang ada.
+Plot Prediksi vs Actual di bawah menunjukkan hubungan antara nilai aktual dan nilai prediksi dari model regresi linier. Garis merah putus-putus merepresentasikan garis ideal di mana nilai prediksi sama dengan nilai aktual (y = x).
+
 ![pre](https://github.com/user-attachments/assets/c83f8c31-e837-4c44-bed8-ce20ef2c0001)
+
+- Sebagian besar data terdistribusi di sekitar garis ideal, menunjukkan bahwa model regresi memiliki performa yang baik dalam memprediksi kandungan kalori.
+- Terdapat beberapa titik yang jauh dari garis ideal, yang mengindikasikan adanya kesalahan prediksi pada beberapa sampel. Namun, jumlah titik tersebut relatif kecil.
+
+Visualisasi ini mendukung hasil evaluasi numerik, yaitu MSE sebesar 0.157, yang menunjukkan bahwa model memiliki kesalahan prediksi yang kecil dan performa yang cukup akurat dalam memprediksi kandungan kalori makanan.
 
 **Dampak terhadap Business Understanding**:
 - Problem Statement: Model ini berhasil menjawab problem statement mengenai prediksi kandungan gizi makanan dan memberikan wawasan tentang kualitas gizi makanan yang dikonsumsi oleh masyarakat Indonesia.
