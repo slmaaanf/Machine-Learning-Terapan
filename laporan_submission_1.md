@@ -41,9 +41,6 @@ Dataset ini terdiri dari informasi mengenai lebih dari seribu jenis makanan dan 
 **Exploratory Data Analysis (EDA)**:
 - Sebelum melanjutkan ke tahap modeling, kita akan melakukan eksplorasi data untuk memahami distribusi kalori, protein, lemak, dan karbohidrat pada dataset ini. Visualisasi seperti histogram dan box plot akan membantu dalam mengeksplorasi pola dan potensi outlier dalam data.
 
-  **Berikut adalah distribusi kalori, protein, lemak, dan karbohidrat pada dataset**:
-  ![Distribusi Kalori, Protein, Lemak, dan Karbohidrat](https://drive.google.com/file/d/1pWWUn0e239nD3n1QCgL2p8DHM5i2dgI6/view?usp=drive_link)
-
 ## Data Preparation
 
 **Teknik Data Preparation**: 
