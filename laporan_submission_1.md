@@ -28,16 +28,19 @@ Bagaimana cara mengidentifikasi dan menganalisis kandungan gizi dari makanan yan
   Evaluasi dari solusi ini akan menggunakan metrik seperti Akurasi untuk klasifikasi dan RMSE (Root Mean Squared Error) untuk regresi, untuk memastikan bahwa model dapat memberikan rekomendasi yang relevan dan akurat.
       
 ## Data Understanding
-Dataset ini terdiri dari informasi mengenai lebih dari seribu jenis makanan dan minuman khas Indonesia, dengan kolom-kolom seperti kalori, protein, lemak, karbohidrat, dan nama makanan. Contoh: [Kaggle - Indonesian Food and Drink Nutrition Dataset](https://www.kaggle.com/datasets/anasfikrihanif/indonesian-food-and-drink-nutrition-dataset) 
+Dataset ini terdiri dari informasi mengenai lebih dari seribu jenis makanan dan minuman khas Indonesia, dengan kolom-kolom seperti kalori, protein, lemak, karbohidrat, dan nama makanan. 
+
+Sumber dataset: [Kaggle - Indonesian Food and Drink Nutrition Dataset](https://www.kaggle.com/datasets/anasfikrihanif/indonesian-food-and-drink-nutrition-dataset) 
 
 **Informasi Dataset**:
 - Jumlah data: Dataset ini terdiri dari 1346 baris dan 6 kolom.
 - Kondisi data:
-    - Missing values: Tidak ditemukan missing values pada dataset.
+    - Missing values: Hasil pengecekan menunjukkan bahwa tidak ditemukan missing values pada dataset, berdasarkan output dari isnull().sum().
     - Duplikat: Tidak ditemukan data duplikat.
-    - Outlier: Terdapat beberapa nilai yang terlihat ekstrim pada beberapa fitur, seperti kalori dan lemak yang sangat tinggi pada beberapa makanan, namun tidak dianggap sebagai outlier signifikan setelah pengecekan lebih lanjut.
+    - Outlier: Tidak ada langkah eksplisit untuk mengidentifikasi atau menangani outlier dalam kode, namun distribusi data untuk fitur kalori, protein, lemak, dan karbohidrat telah divisualisasikan menggunakan histogram untuk memberikan gambaran tentang persebaran nilai. Tidak ada indikasi penanganan khusus terhadap nilai ekstrim dalam dataset.
       
 **Fitur pada Indonesian Food and Drink Nutrition Dataset adalah sebagai berikut**:
+- Id: digunakan sebagai identifikasi unik untuk setiap baris data
 - Calories: Kalori per porsi makanan.
 - Proteins: Kandungan protein per porsi makanan.
 - Fat: Kandungan lemak per porsi makanan.
@@ -54,9 +57,7 @@ Sebelum melanjutkan ke tahap modeling, kita akan melakukan eksplorasi data untuk
 - Distribusi Lemak: Lemak memiliki distribusi yang sangat bervariasi, dengan sebagian besar makanan memiliki kandungan lemak yang relatif rendah.
 - Distribusi Karbohidrat: Sebagian besar makanan memiliki kandungan karbohidrat yang lebih tinggi, menunjukkan bahwa karbohidrat adalah komponen utama dalam makanan ini.
 
-![Visualisasi Distribusi Data](https://drive.google.com/uc?export=view&id=1pWWUn0e239nD3n1QCgL2p8DHM5i2dgI6)
-
-
+![nut](https://github.com/user-attachments/assets/ba8547ae-0bf3-48e9-b33d-e7103c7b5aea)
 
 ## Data Preparation
 Proses data preparation yang dilakukan pada dataset ini mencakup langkah-langkah berikut:
@@ -78,14 +79,11 @@ Pada bagian ini, saya menggunakan algoritma Linear Regression untuk memprediksi 
 Untuk mengevaluasi model, kita menggunakan beberapa metrik untuk mengukur kinerja model dalam memberikan rekomendasi yang relevan dan akurat.
 
 **Metrik Evaluasi yang Digunakan**:
-- Regresi Linier: Metrik yang digunakan adalah RMSE (Root Mean Squared Error) untuk mengukur seberapa akurat prediksi kandungan gizi (seperti kalori) oleh model berdasarkan fitur lainnya.
-- Klasifikasi (untuk rekomendasi sehat vs tidak sehat): Metrik evaluasi yang digunakan adalah Akurasi, Precision, Recall, dan F1-Score. Metrik ini digunakan untuk mengevaluasi seberapa baik model dapat mengklasifikasikan makanan sebagai sehat atau tidak sehat berdasarkan profil gizi mereka.
-  
-**Hasil Evaluasi**:
-- Regresi Linier: Hasil evaluasi model regresi menggunakan RMSE menunjukkan Mean Squared Error (MSE) sebesar 0.157, yang menunjukkan kesalahan yang relatif kecil dalam memprediksi kandungan kalori makanan berdasarkan data yang ada.
-- Model Klasifikasi: Jika model klasifikasi digunakan (misalnya menggunakan KNN atau Decision Trees), evaluasi dilakukan dengan menghitung Akurasi, Precision, Recall, dan F1-Score. Metrik-metrik ini akan memberikan gambaran tentang kemampuan model dalam mengklasifikasikan makanan sebagai sehat atau tidak sehat.
+- Regresi Linier: Metrik yang digunakan adalah MSE (Mean Squared Error) untuk mengukur seberapa akurat prediksi kandungan gizi (seperti kalori) oleh model berdasarkan fitur lainnya. MSE memberikan gambaran tentang rata-rata kuadrat kesalahan antara nilai prediksi dan nilai aktual, dengan nilai yang lebih kecil menunjukkan model yang lebih akurat.
 
-![hasil prediksi vs actual values](https://drive.google.com/uc?export=view&id=1KUkZMw0s4IHTb3z9SKfLrNzINO1KH9_X)
+**Hasil Evaluasi**:
+- Regresi Linier:Hasil evaluasi model regresi menggunakan Mean Squared Error (MSE) menunjukkan nilai sebesar 0.157, yang menggambarkan rata-rata kuadrat kesalahan yang relatif kecil dalam memprediksi kandungan kalori makanan berdasarkan data yang ada.
+![pre](https://github.com/user-attachments/assets/c83f8c31-e837-4c44-bed8-ce20ef2c0001)
 
 **Dampak terhadap Business Understanding**:
 - Problem Statement: Model ini berhasil menjawab problem statement mengenai prediksi kandungan gizi makanan dan memberikan wawasan tentang kualitas gizi makanan yang dikonsumsi oleh masyarakat Indonesia.
