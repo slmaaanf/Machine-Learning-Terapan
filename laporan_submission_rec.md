@@ -35,6 +35,12 @@ Membandingkan performa Content-Based Filtering dan Collaborative Filtering untuk
 ## Data Understanding
 Dataset yang digunakan diperoleh dari Kaggle dan terdiri dari tiga tabel utama [Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset?).
 
+Pada tahap ini, kita memahami dataset yang digunakan dalam proyek, termasuk jumlah data dan fitur yang ada.
+Dataset terdiri dari:
+- **Users**: Informasi pengguna seperti ID, lokasi, dan usia.
+- **Ratings**: Data rating yang diberikan pengguna terhadap buku.
+- **Books**: Informasi buku seperti judul, penulis, dan tahun publikasi.
+
 🔍 Eksplorasi Data
 
 ✔ Memeriksa jumlah total pengguna, buku, dan rating.
@@ -64,8 +70,8 @@ ratings = pd.read_csv(dataset_path + "/Ratings.csv")
 - **Publisher**: Nama penerbit buku.
 - **User-ID**: ID unik pengguna.
 - **Book-Rating**: Rating buku dari pengguna (rentang 1-10).
-
-Dari hasil jumlah data yang didapat tidak terdapat duplikat tetapi adanya missing value pada data. 
+- **Location**: Posisi atau tempat individu.
+- **Age**: Umur pengguna.
 
 :books: Books 
 
@@ -99,13 +105,24 @@ EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta 
   Hasil EDA ini membantu dalam mempersiapkan data sebelum pemodelan. 🚀
 
 ## Data Preparation
-✔ **Cleaning Data:** Menghapus nilai yang hilang dan duplikasi.
-✔ **Menggabungkan Data:** Menggabungkan data rating dengan book berdasarkan ISBN.
-✔ **Menangani Missing Values:** Mengecek dan menghapus nilai yang hilang setelah penggabungan.
-✔ **Memfilter Data:** Memilih hanya buku dengan jumlah rating cukup (minimal 5 review).
-✔ **Hasil Akhir Data:** Menampilkan dataset yang sudah dibersihkan.
+
+✔ Cleaning Data: Menghapus nilai yang hilang dan duplikasi.
+
+✔ Menggabungkan Data: Menggabungkan data rating dengan book berdasarkan ISBN.
+
+✔ Menangani Missing Values: Mengecek dan menghapus nilai yang hilang setelah penggabungan.
+
+✔ Memfilter Data: Memilih hanya buku dengan jumlah rating cukup (minimal 5 review).
+
+✔ Ekstraksi Fitur dengan TF-IDF: Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
+
+✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
+
+✔ Hasil Akhir Data: Menampilkan dataset yang sudah dibersihkan dan siap digunakan untuk pemodelan.
 
 1️⃣ Cleaning Data (Menghapus duplikasi & nilai yang hilang)
+- Menghapus duplikasi pada dataset.
+- Mengecek dan menghapus nilai yang hilang pada kolom Book-Author dan Publisher.
 
 ```
 # Menghapus duplikasi
@@ -126,6 +143,7 @@ print("Data setelah menghapus missing values:", books.shape)
 ![image](https://github.com/user-attachments/assets/39a96833-92ae-4b13-a27d-ea3cc687914c)
 
 2️⃣ Menggabungkan Data (Rating + Books)
+- Menggabungkan data ratings dengan books berdasarkan ISBN agar setiap rating memiliki informasi buku yang sesuai.
 
 ```
 # Menggabungkan dataframe ratings dengan books berdasarkan nilai ISBN
@@ -136,7 +154,8 @@ books
 ![image](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
 
 3️⃣ Menangani Missing Values Setelah Penggabungan
-
+- Mengecek kembali apakah ada missing values setelah penggabungan.
+- Menghapusnya jika diperlukan.
 ```
 books.isnull().sum()  # Mengecek jumlah missing values
 books.dropna(inplace=True)  # Menghapus baris dengan missing values jika perlu
@@ -148,7 +167,7 @@ print("Data setelah menghapus missing values:", books.shape)
 ![image](https://github.com/user-attachments/assets/066054ec-9cbb-4df1-878b-45a11881ea25)
 
 4️⃣ Memfilter Data dengan Rating Cukup
-
+- Memastikan hanya buku yang memiliki minimal 5 rating yang digunakan agar data lebih valid.
 ```
 book_counts = books.groupby('ISBN')['Book-Rating'].count()
 books = books[books['ISBN'].isin(book_counts[book_counts >= 5].index)]
@@ -161,35 +180,80 @@ print("Jumlah data setelah memfilter buku dengan minimal 5 rating:", books.shape
 Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 ``
 
-5️⃣ Hasil Data Setelah Dibersihkan
+5️⃣ Ekstraksi Fitur dengan TF-IDF
 
-![image](https://github.com/user-attachments/assets/a96c2380-cccb-4491-929a-c58277fc861f)
+- Ekstraksi fitur dilakukan untuk merepresentasikan teks dalam bentuk numerik menggunakan TF-IDF. Hal ini membantu dalam menemukan buku dengan kemiripan teks berdasarkan judul atau deskripsi buku.
+```
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-6️⃣ Jumlah data setelah di bersihkan
+tfidf = TfidfVectorizer(stop_words="english")
+tfidf_matrix = tfidf.fit_transform(books["Book-Title"])
+
+print("TF-IDF Matrix Shape:", tfidf_matrix.shape)
+```
+``
+TF-IDF Matrix Shape: (670480, 21731)
+``
+
+6️⃣ Persiapan Data untuk Collaborative Filtering
+- Membentuk user-item matrix dari dataset rating.
+- Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
+- Melakukan normalisasi rating agar performa model lebih baik.
+```
+from surprise import SVD, Dataset, Reader
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Menyiapkan dataset untuk Surprise
+reader = Reader(rating_scale=(0, 10))  # Sesuaikan dengan skala rating dataset-mu
+data = Dataset.load_from_df(books[["User-ID", "ISBN", "Book-Rating"]], reader)
+
+# Membagi data menjadi training & testing
+trainset, testset = train_test_split(data, test_size=0.2)
+
+# Menggunakan SVD dari Surprise
+model = SVD(n_factors=20, random_state=42)
+model.fit(trainset)
+
+# Memprediksi pada test set
+predictions = model.test(testset)
+
+# Mengukur akurasi
+rmse = accuracy.rmse(predictions)
+print("SVD with Surprise RMSE:", rmse)
 
 ```
-## Data Preparation
+``
+RMSE: 3.6694
+SVD with Surprise RMSE: 3.669365879489593
+``
 
-# Menghapus rating 0 karena tidak merepresentasikan penilaian
-ratings = ratings[ratings['Book-Rating'] > 0]
+7️⃣ Rekomendasi Buku untuk Pengguna
 
+Setelah model dibuat, kita bisa merekomendasikan buku berdasarkan rating prediksi.
+
+``
+Rekomendasi untuk User 12345: ['0439425220', '0618002235', '0836213319', '0743454529', '0140143505']
+``
+
+8️⃣ Hasil Akhir Data Setelah Dibersihkan
+- Setelah semua tahapan data preparation dilakukan, dataset siap digunakan untuk pemodelan rekomendasi.
+```
 print("\nJumlah data setelah pembersihan:")
 print(f"Books: {books.shape[0]} baris")
 print(f"Users: {users.shape[0]} baris")
 print(f"Ratings: {ratings.shape[0]} baris")
 ```
-``
-Jumlah data setelah pembersihan:
-Books: 670480 baris
-Users: 278858 baris
-Ratings: 433671 baris
-``
+
+![image](https://github.com/user-attachments/assets/a96c2380-cccb-4491-929a-c58277fc861f)
 
 :pushpin: Kesimpulan
 
 - Tahapan data preparation berhasil membersihkan dataset dengan menghapus duplikasi, menangani nilai yang hilang, dan memastikan hanya buku dengan jumlah rating yang memadai digunakan dalam model. Hal ini memastikan bahwa model rekomendasi akan bekerja dengan data yang lebih akurat dan relevan.
   
-## Modeling
+
+## **Modeling and Results**
+
 Pada bagian ini dibagi menjadi 2 tahap model yaitu :
 
 :sparkles: content based filtering
@@ -226,6 +290,10 @@ cross_validate(model, data, cv=5, verbose=True)
 
 ![image](https://github.com/user-attachments/assets/3506a2a8-4711-4237-87e9-b0fc53756bf6)
 
+### ▶ **Hasil Rekomendasi Buku**
+Rekomendasi berikut diperoleh berdasarkan Collaborative Filtering menggunakan SVD:
+
+![image](https://github.com/user-attachments/assets/510b41c5-8f1a-4786-a076-2321993e1958)
 
 ### **Kelebihan & Kekurangan**
 | Pendekatan                | Kelebihan                                    | Kekurangan                                    |
@@ -233,100 +301,42 @@ cross_validate(model, data, cv=5, verbose=True)
 | **Content-Based Filtering** | Tidak memerlukan data pengguna lain | Terbatas pada metadata yang tersedia |
 | **Collaborative Filtering** | Mampu memberikan rekomendasi personal | Membutuhkan data interaksi yang cukup |
 
-## Evaluation
-Untuk mengevaluasi model, digunakan metrik RMSE serta Precision@K dan Recall@K.
-- RMSE mengukur seberapa dekat prediksi dengan rating asli.
-- Precision@K dan Recall@K mengevaluasi relevansi rekomendasi yang diberikan.
-
-:boom: Menggunakan Precision@K dan Recall@K untuk evaluasi Content-Based Filtering
-
+## Evaluation Model 
+**1. Evaluasi Collaborative Filtering (SVD)**
+- Menggunakan RMSE untuk mengukur error antara rating asli dan prediksi.
+  
 ```
-## Collaborative Filtering
-from collections import defaultdict
+from surprise import accuracy
+from surprise import SVD
+
+# Load data
 reader = Reader(rating_scale=(1, 10))
 data = Dataset.load_from_df(ratings[['User-ID', 'ISBN', 'Book-Rating']], reader)
-model = SVD()
-cross_validate(model, data, cv=5, verbose=True)
 
-# Fit model and generate predictions
+# Train model
 trainset = data.build_full_trainset()
+model = SVD()
 model.fit(trainset)
-predictions = model.test(trainset.build_testset()) # Generate predictions for evaluation
 
+# Predictions
+predictions = model.test(trainset.build_testset())
 
-#Evaluasi Content-Based Filtering
-def precision_recall_at_k(predictions, k=5, threshold=7):
-    """Menghitung Precision@K dan Recall@K"""
-    user_est_true = defaultdict(list)
-    for uid, _, true_r, est, _ in predictions:
-        user_est_true[uid].append((est, true_r))
-    precisions, recalls = [], []
-    for uid, user_ratings in user_est_true.items():
-        user_ratings.sort(key=lambda x: x[0], reverse=True)
-        top_k = user_ratings[:k]
-        n_rel = sum((true_r >= threshold) for (_, true_r) in user_ratings)
-        n_rec_k = sum((true_r >= threshold) for (_, true_r) in top_k)
-        precision = n_rec_k / k if k else 0
-        recall = n_rec_k / n_rel if n_rel else 0
-        precisions.append(precision)
-        recalls.append(recall)
-    return sum(precisions) / len(precisions), sum(recalls) / len(recalls)
-precision, recall = precision_recall_at_k(predictions, k=5, threshold=7)
-print(f'Precision@5: {precision:.4f}')
-print(f'Recall@5: {recall:.4f}')
+# RMSE Evaluation
+rmse = accuracy.rmse(predictions)
+print("RMSE Score (SVD):", rmse)
+
 ```
-![image](https://github.com/user-attachments/assets/d8cd15b7-a62a-4e29-bdcb-ad240c4e9f75)
+![image](https://github.com/user-attachments/assets/3db25be3-df0a-4f41-98c2-e311a24cdb9f)
 
-:boom: RMSE untuk Collaborative Filtering 
+:boom: Model SVD dilatih menggunakan dataset.
+:boom: Digunakan RMSE untuk mengevaluasi akurasi model.
+
+**2. Evaluasi Neural Network-Based Recommender**
+- Menggunakan RMSE dari model.fit() untuk melihat performa Neural Network.
 
 💡 Formula RMSE:
 
 ![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
-
-```
-#Evaluasi RMSE untuk Collaborative Filtering dan Neural Network
-
-from sklearn.metrics import mean_squared_error
-trainset = data.build_full_trainset()
-model.fit(trainset)
-predictions = model.test(trainset.build_testset())
-rmse = np.sqrt(mean_squared_error(ratings['Book-Rating'], [pred.est for pred in predictions]))
-print("RMSE Score:", rmse)
-```
-![image](https://github.com/user-attachments/assets/490a821f-59af-4b4d-8a27-4ea34d8ee9de)
-
-Dengan evaluasi ini, kita dapat menilai apakah model sudah memberikan rekomendasi yang baik dan menentukan pendekatan mana yang lebih optimal.
-
-:boom: Neural Network-Based Recommender System
-
-Model ini menggunakan pendekatan berbasis Neural Network untuk memberikan rekomendasi buku berdasarkan interaksi pengguna.
-
-Langkah-langkah yang dilakukan:
-
-1️⃣ Mapping Data ke Indeks Numerik
-
-User-ID dan ISBN dikonversi menjadi indeks integer agar bisa digunakan dalam embedding.
-
-2️⃣ Split Data untuk Training dan Validation
-
-Dataset dibagi menjadi 80% training dan 20% validation menggunakan train_test_split().
-
-3️⃣ Membangun Arsitektur Neural Network
-
-Input layer untuk user dan buku.
-Embedding layer untuk membuat representasi vektor masing-masing.
-Dense layers dengan ReLU activation untuk menangkap hubungan kompleks.
-Output layer untuk memprediksi rating buku.
-
-4️⃣ Melatih Model
-
-Model dikompilasi dengan Adam optimizer dan Mean Squared Error (MSE) sebagai loss function.
-Dilatih selama 10 epoch dengan batch size 32.
-
-5️⃣ Evaluasi Model
-
-RMSE digunakan untuk mengukur error antara prediksi dan rating asli.
-Jika train RMSE terus menurun tetapi validation RMSE tetap tinggi, berarti model mengalami overfitting.
 
 ```
 # Prepare data for the neural network
@@ -373,7 +383,8 @@ history = model.fit(
     validation_data=([x_val[:, 0], x_val[:, 1]], y_val)
 )
 ```
-![image](https://github.com/user-attachments/assets/a2f62b7b-5c65-4092-93b3-8149838b5016)
+![image](https://github.com/user-attachments/assets/3653ad14-5699-4e91-95bb-a995f08d6164)
+
 
 💡 Visualisasi Evaluasi
 
@@ -396,7 +407,8 @@ plt.title("Evaluasi RMSE Model")
 plt.legend()
 plt.show()
 ```
-![image](https://github.com/user-attachments/assets/38801c17-0b59-402b-a0f2-3c5c336c5a80)
+![image](https://github.com/user-attachments/assets/ff588ec4-8785-45bf-9982-0a1fa73496e6)
+
 
 # Kesimpulan
 
