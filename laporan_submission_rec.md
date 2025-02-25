@@ -372,6 +372,7 @@ print("RMSE Score (SVD):", rmse)
 RMSE: 1.2406
 RMSE Score (SVD): 1.2406265591732735
 ``
+
 📌 Kesimpulan:
 
 * Content-Based Filtering cocok untuk rekomendasi berbasis metadata buku.
