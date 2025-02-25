@@ -70,8 +70,8 @@ ratings = pd.read_csv(dataset_path + "/Ratings.csv")
 - **Publisher**: Nama penerbit buku.
 - **User-ID**: ID unik pengguna.
 - **Book-Rating**: Rating buku dari pengguna (rentang 1-10).
-- **Location**: Posisi atau tempat individu.
-- **Age**: Umur pengguna.
+- **Location**: Tempat tinggal pengguna berdasarkan informasi yang diberikan saat registrasi. Bisa berupa kota atau negara.
+- **Age**: Usia pengguna dalam tahun, yang digunakan untuk memahami demografi pembaca.
 
 :books: Books 
 
@@ -116,7 +116,7 @@ EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta 
 
 ✔ Ekstraksi Fitur dengan TF-IDF: Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
 
-✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
+✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD.
 
 ✔ Hasil Akhir Data: Menampilkan dataset yang sudah dibersihkan dan siap digunakan untuk pemodelan.
 
@@ -230,7 +230,7 @@ SVD with Surprise RMSE: 3.669365879489593
 
 7️⃣ Rekomendasi Buku untuk Pengguna
 
-Setelah model dibuat, kita bisa merekomendasikan buku berdasarkan rating prediksi.
+- Setelah model dibuat, kita bisa merekomendasikan buku berdasarkan rating prediksi.
 
 ``
 Rekomendasi untuk User 12345: ['0439425220', '0618002235', '0836213319', '0743454529', '0140143505']
@@ -245,7 +245,7 @@ print(f"Users: {users.shape[0]} baris")
 print(f"Ratings: {ratings.shape[0]} baris")
 ```
 
-![image](https://github.com/user-attachments/assets/a96c2380-cccb-4491-929a-c58277fc861f)
+![image](https://github.com/user-attachments/assets/b75b4979-04b1-411b-a2c2-13c49a22e132)
 
 :pushpin: Kesimpulan
 
@@ -276,9 +276,9 @@ nn.fit(tfidf_matrix) # Fit the TF-IDF matrix
 ![image](https://github.com/user-attachments/assets/6bf7da17-8858-4861-ab50-518311c88ae9)
 
 
-🔎 Collaborative Filtering
+🔎 Collaborative Filtering (Matrix Factorization)
 
-Pendekatan ini menggunakan metode Singular Value Decomposition (SVD) untuk mendekomposisi matriks pengguna-buku dan memprediksi rating.
+- Menggunakan metode Singular Value Decomposition (SVD) untuk mendekomposisi matriks pengguna-buku dan memprediksi rating.
 
 ```
 ## Collaborative Filtering (Matrix Factorization)
@@ -329,10 +329,16 @@ print("RMSE Score (SVD):", rmse)
 ![image](https://github.com/user-attachments/assets/3db25be3-df0a-4f41-98c2-e311a24cdb9f)
 
 :boom: Model SVD dilatih menggunakan dataset.
+
 :boom: Digunakan RMSE untuk mengevaluasi akurasi model.
 
 **2. Evaluasi Neural Network-Based Recommender**
 - Menggunakan RMSE dari model.fit() untuk melihat performa Neural Network.
+- Jika train RMSE terus menurun tetapi validation RMSE tetap tinggi, berarti model mengalami overfitting.
+- Solusi untuk Overfitting:
+    - Menambahkan dropout layer dalam arsitektur model.
+    - Menggunakan regularisasi L2 pada dense layer.
+    - Melakukan hyperparameter tuning pada jumlah neuron dan learning rate.
 
 💡 Formula RMSE:
 
@@ -389,6 +395,7 @@ history = model.fit(
 💡 Visualisasi Evaluasi
 
 Berdasarkan grafik RMSE:
+
 ✔ **Train RMSE menurun secara signifikan**, menunjukkan model belajar dengan baik pada data pelatihan.
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
@@ -412,13 +419,13 @@ plt.show()
 
 # Kesimpulan
 
-Dari proyek ini, dapat disimpulkan bahwa:
-
 :star2: Content-Based Filtering cocok untuk rekomendasi berbasis metadata buku.
 
 :star2: Collaborative Filtering lebih efektif dalam memberikan rekomendasi yang personal.
 
 :star2: Neural Network-Based Recommender System menghasilkan hasil terbaik dalam memahami hubungan kompleks antara pengguna dan buku.
+
+:star2: Model Neural Network mengalami overfitting, sehingga perlu dilakukan perbaikan dengan metode regularisasi dan tuning hyperparameter.
 
 Proyek ini memberikan wawasan mengenai perbandingan dua metode rekomendasi dan dapat dikembangkan lebih lanjut dengan menggabungkan metode untuk meningkatkan akurasi.
 
