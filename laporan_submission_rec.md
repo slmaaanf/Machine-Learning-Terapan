@@ -4,7 +4,7 @@
 
 ![Books](https://github.com/user-attachments/assets/44b105d4-843b-48b0-932e-8812eb447fc8)
 
-Beragamnya jenis buku dan banyaknya jumlah buku merupakan permasalahan tersendiri bagi para pembaca buku. Salah satu permasalahan yang muncul adalah saat pembaca kesulitan dalam menentukan buku yang akan dibaca selanjutnya. Sistem rekomendasi buku sangat penting dalam era digital karena membantu pengguna menemukan buku yang sesuai dengan preferensi mereka. Proyek ini bertujuan untuk membangun sistem rekomendasi berbasis Content-Based Filtering dan Collaborative Filtering dengan dataset dari Kaggle.
+Beragamnya jenis buku dan banyaknya jumlah buku merupakan permasalahan tersendiri bagi para pembaca buku. Salah satu permasalahan yang muncul adalah saat pembaca kesulitan dalam menentukan buku yang akan dibaca selanjutnya. Sistem rekomendasi buku sangat penting dalam era digital karena membantu pengguna menemukan buku yang sesuai dengan preferensi mereka. Proyek ini bertujuan untuk membangun sistem rekomendasi buku menggunakan **Content-Based Filtering, Collaborative Filtering, dan Neural Network-Based Recommender System** dengan dataset dari Kaggle.
 
 💡 Manfaat Proyek:
 
@@ -116,7 +116,7 @@ EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta 
 
 ✔ Ekstraksi Fitur dengan TF-IDF: Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
 
-✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD.
+✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
 
 ✔ Hasil Akhir Data: Menampilkan dataset yang sudah dibersihkan dan siap digunakan untuk pemodelan.
 
@@ -150,7 +150,6 @@ print("Data setelah menghapus missing values:", books.shape)
 books = pd.merge(ratings, books, on='ISBN', how='left')
 books
 ```
-
 ![image](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
 
 3️⃣ Menangani Missing Values Setelah Penggabungan
@@ -196,7 +195,7 @@ TF-IDF Matrix Shape: (670480, 21731)
 ``
 
 ✔ **Hasil Ekstraksi TF-IDF**  
-TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
+* TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
 
 6️⃣ Persiapan Data untuk Collaborative Filtering
 - Membentuk user-item matrix dari dataset rating.
@@ -231,9 +230,22 @@ RMSE: 3.6694
 SVD with Surprise RMSE: 3.669365879489593
 ``
 
+📌 Hasil Evaluasi:
+
+RMSE: 3.6694 menunjukkan performa model cukup baik dalam memprediksi rating buku.
+
 7️⃣ Rekomendasi Buku untuk Pengguna
 
 - Setelah model dibuat, kita bisa merekomendasikan buku berdasarkan rating prediksi.
+
+```
+# Contoh rekomendasi untuk user dengan ID 12345
+user_id = 12345
+recommended_books = get_book_recommendations(user_id, model, books)
+
+print(f"Rekomendasi untuk User {user_id}: {recommended_books}")
+```
+📌 Hasil Output:
 
 ``
 Rekomendasi untuk User 12345: ['0439425220', '0618002235', '0836213319', '0743454529', '0140143505']
@@ -252,34 +264,52 @@ print(f"Ratings: {ratings.shape[0]} baris")
 
 :pushpin: Kesimpulan
 
-- Tahapan data preparation berhasil membersihkan dataset dengan menghapus duplikasi, menangani nilai yang hilang, dan memastikan hanya buku dengan jumlah rating yang memadai digunakan dalam model. Hal ini memastikan bahwa model rekomendasi akan bekerja dengan data yang lebih akurat dan relevan.
-  
+✅ Tahapan data preparation berhasil membersihkan dataset dengan:
 
+* Menghapus duplikasi.
+
+* Menangani nilai yang hilang.
+
+* Memastikan hanya buku dengan jumlah rating yang memadai digunakan dalam model.
+
+📌 Manfaat:
+Hal ini memastikan bahwa model rekomendasi akan bekerja dengan data yang lebih akurat dan relevan.
+  
 ## **Modeling and Results**
 
-Pada bagian ini dibagi menjadi 2 tahap model yaitu :
+📝 Pendekatan Model
 
-:sparkles: content based filtering
+Pada bagian ini digunakan dua pendekatan utama:
 
-:sparkles: collaborative filtering
+:sparkles: Content-Based Filtering → Mencari buku serupa berdasarkan fitur judul.
 
+:sparkles: Collaborative Filtering (Matrix Factorization) → Memprediksi rating berdasarkan pola rating pengguna lain.
+ 
 📖 Content-Based Filtering
 - Menggunakan Nearest Neighbors untuk mencari buku serupa berdasarkan fitur judul buku.
+  
+  ✔ Arsitektur Neural Network
+  * Embedding layer digunakan untuk mengonversi user & buku ke dalam vektor laten.
+  * ReLU activation membantu menangkap pola hubungan lebih kompleks.
 
 ```
-## Content-Based Filtering
+# Function to recommend books
+def recommend_books_nn(title, n=5):
+    if title not in books['Book-Title'].values:
+        return f"Book '{title}' not found in the dataset."
 
-tfidf = TfidfVectorizer(stop_words='english') # Initialize TfidfVectorizer
-tfidf_matrix = tfidf.fit_transform(books['Book-Title']) # Fit and transform book titles
+    idx = books[books['Book-Title'] == title].index[0]
+    distances, indices = nn.kneighbors(tfidf_matrix[idx], n_neighbors=n+1)
 
-nn = NearestNeighbors(metric='cosine', algorithm='brute') # Initialize NearestNeighbors
-nn.fit(tfidf_matrix) # Fit the TF-IDF matrix
+    return books.iloc[indices[0][1:]][['Book-Title', 'Book-Author']]
 
+# Example recommendation
+recommend_books_nn("A Painted House")
 ```
 ![image](https://github.com/user-attachments/assets/6bf7da17-8858-4861-ab50-518311c88ae9)
 
 
-🔎 Collaborative Filtering (Matrix Factorization)
+🔎 Collaborative Filtering (Matrix Factorization - SVD)
 
 - Menggunakan metode Singular Value Decomposition (SVD) untuk mendekomposisi matriks pengguna-buku dan memprediksi rating.
 
@@ -291,12 +321,18 @@ model = SVD()
 cross_validate(model, data, cv=5, verbose=True)
 ```
 
-![image](https://github.com/user-attachments/assets/3506a2a8-4711-4237-87e9-b0fc53756bf6)
+![image](https://github.com/user-attachments/assets/35c8a1ea-36a7-4adc-b3c7-d2d71c47283b)
 
 ### ▶ **Hasil Rekomendasi Buku**
-Rekomendasi berikut diperoleh berdasarkan Collaborative Filtering menggunakan SVD:
-
-![image](https://github.com/user-attachments/assets/510b41c5-8f1a-4786-a076-2321993e1958)
+- Top-N Rekomendasi Buku (Collaborative Filtering - SVD)
+  
+  | Judul Buku | ISBN | Prediced Rating |
+  | ------ | ----- | ------ |
+  | Walk Two Moons | 0064405176 | 10.00 |
+  | Der Kleine Hobbit | 3423071516 | 10.00 |
+  | Mit dem KÃ?Â¼hlschrank durch Irland | 3442446414 | 10.00 |
+  | Harry Potter und der Gefangene von Azkaban | 3551551693 | 10.00 |
+  | Die Zwei Turme II | 3608935428 | 10.00 |
 
 ### **Kelebihan & Kekurangan**
 | Pendekatan                | Kelebihan                                    | Kekurangan                                    |
@@ -329,7 +365,10 @@ rmse = accuracy.rmse(predictions)
 print("RMSE Score (SVD):", rmse)
 
 ```
-![image](https://github.com/user-attachments/assets/3db25be3-df0a-4f41-98c2-e311a24cdb9f)
+``
+RMSE: 1.2406
+RMSE Score (SVD): 1.2406265591732735
+``
 
 :boom: Model SVD dilatih menggunakan dataset.
 
@@ -338,7 +377,8 @@ print("RMSE Score (SVD):", rmse)
 **2. Evaluasi Neural Network-Based Recommender**
 - Menggunakan RMSE dari model.fit() untuk melihat performa Neural Network.
 - Jika train RMSE terus menurun tetapi validation RMSE tetap tinggi, berarti model mengalami overfitting.
-- Solusi untuk Overfitting:
+  
+✔ Solusi untuk Overfitting:
     - Menambahkan dropout layer dalam arsitektur model.
     - Menggunakan regularisasi L2 pada dense layer.
     - Melakukan hyperparameter tuning pada jumlah neuron dan learning rate.
@@ -347,11 +387,14 @@ print("RMSE Score (SVD):", rmse)
 
 ![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
 
-✔ **Arsitektur Neural Network**  
-Model menggunakan embedding layer untuk mengonversi user dan buku ke dalam vektor laten. Aktivasi **ReLU** digunakan karena sifatnya yang non-linear, sehingga model bisa menangkap pola hubungan lebih kompleks dibanding pendekatan linear.
-
 ```
 # Prepare data for the neural network
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split
+
+# Mapping user dan book ID ke indeks numerik
 user_ids = ratings['User-ID'].unique()
 book_isbns = ratings['ISBN'].unique()
 
@@ -364,39 +407,59 @@ ratings['ISBN'] = ratings['ISBN'].map(book_mapping)
 num_users = len(user_ids)
 num_books = len(book_isbns)
 
+# Membagi dataset
 X = ratings[['User-ID', 'ISBN']].values
 y = ratings['Book-Rating'].values
 x_train, x_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Define the neural network model using the functional API
+# Define the neural network model
 user_input = keras.Input(shape=(1,), name='user_id')
 book_input = keras.Input(shape=(1,), name='isbn')
 
-user_embedding = layers.Embedding(num_users, 50, input_length=1)(user_input)
-book_embedding = layers.Embedding(num_books, 50, input_length=1)(book_input)
+# Embedding layers
+user_embedding = layers.Embedding(input_dim=num_users, output_dim=50, input_length=1)(user_input)
+book_embedding = layers.Embedding(input_dim=num_books, output_dim=50, input_length=1)(book_input)
 
-merged = layers.concatenate([user_embedding, book_embedding], axis=1)
-flattened = layers.Flatten()(merged)
-dense1 = layers.Dense(128, activation='relu')(flattened)
+# Flatten sebelum concatenate
+user_embedding = layers.Flatten()(user_embedding)
+book_embedding = layers.Flatten()(book_embedding)
+
+# Menggabungkan embeddings
+merged = layers.concatenate([user_embedding, book_embedding])
+
+# Dense layers
+dense1 = layers.Dense(128, activation='relu')(merged)
 dense2 = layers.Dense(64, activation='relu')(dense1)
-output = layers.Dense(1)(dense2)
 
+# Menambahkan Dropout
+dropout = layers.Dropout(0.2)(dense2)
+
+# Output layer (gunakan aktivasi sigmoid jika rating memiliki rentang tetap)
+output = layers.Dense(1, activation='sigmoid')(dropout)
+
+# Define Model
 model = keras.Model(inputs=[user_input, book_input], outputs=output)
-
 
 # Compile the model
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=[tf.keras.metrics.RootMeanSquaredError()])
 
+# Menggunakan Early Stopping
+early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
+# Training model
 history = model.fit(
     x=[x_train[:, 0], x_train[:, 1]], y=y_train,
     epochs=10,
     batch_size=32,
-    validation_data=([x_val[:, 0], x_val[:, 1]], y_val)
+    validation_data=([x_val[:, 0], x_val[:, 1]], y_val),
+    callbacks=[early_stopping]
 )
-```
-![image](https://github.com/user-attachments/assets/3653ad14-5699-4e91-95bb-a995f08d6164)
 
+# Menampilkan ringkasan model
+model.summary()
+
+```
+![image](https://github.com/user-attachments/assets/3b798017-7141-4ebf-8e4f-a8101b59de78)
 
 💡 Visualisasi Evaluasi
 
@@ -420,8 +483,7 @@ plt.title("Evaluasi RMSE Model")
 plt.legend()
 plt.show()
 ```
-![image](https://github.com/user-attachments/assets/ff588ec4-8785-45bf-9982-0a1fa73496e6)
-
+![image](https://github.com/user-attachments/assets/191f5eda-9cba-4c7a-a808-a7b0e033f1d4)
 
 # Kesimpulan
 
@@ -429,7 +491,7 @@ plt.show()
 
 :star2: Collaborative Filtering lebih efektif dalam memberikan rekomendasi yang personal.
 
-:star2: Neural Network-Based Recommender System menghasilkan hasil terbaik dalam memahami hubungan kompleks antara pengguna dan buku.
+:star2: SVD menghasilkan RMSE yang lebih rendah, menunjukkan performa yang lebih stabil dibanding Neural Network.
 
 :star2: Model Neural Network mengalami overfitting, sehingga perlu dilakukan perbaikan dengan metode regularisasi dan tuning hyperparameter.
 
