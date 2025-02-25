@@ -41,14 +41,6 @@ Dataset terdiri dari:
 - **Ratings**: Data rating yang diberikan pengguna terhadap buku.
 - **Books**: Informasi buku seperti judul, penulis, dan tahun publikasi.
 
-🔍 Eksplorasi Data
-
-✔ Memeriksa jumlah total pengguna, buku, dan rating.
-
-✔ Menganalisis distribusi rating untuk melihat pola evaluasi buku oleh pengguna.
-
-✔ Visualisasi hubungan antara pengguna dan buku berdasarkan rating.
-
 ```
 books = pd.read_csv(dataset_path + "/Books.csv")
 users = pd.read_csv(dataset_path + "/Users.csv")
@@ -72,6 +64,14 @@ ratings = pd.read_csv(dataset_path + "/Ratings.csv")
 - **Book-Rating**: Rating buku dari pengguna (rentang 1-10).
 - **Location**: Tempat tinggal pengguna berdasarkan informasi yang diberikan saat registrasi. Bisa berupa kota atau negara.
 - **Age**: Usia pengguna dalam tahun, yang digunakan untuk memahami demografi pembaca.
+
+🔍 Eksplorasi Data
+
+✔ Memeriksa jumlah total pengguna, buku, dan rating.
+
+✔ Menganalisis distribusi rating untuk melihat pola evaluasi buku oleh pengguna.
+
+✔ Visualisasi hubungan antara pengguna dan buku berdasarkan rating.
 
 :books: Books 
 
@@ -155,6 +155,7 @@ books
 3️⃣ Menangani Missing Values Setelah Penggabungan
 - Mengecek kembali apakah ada missing values setelah penggabungan.
 - Menghapusnya jika diperlukan.
+  
 ```
 books.isnull().sum()  # Mengecek jumlah missing values
 books.dropna(inplace=True)  # Menghapus baris dengan missing values jika perlu
@@ -167,6 +168,7 @@ print("Data setelah menghapus missing values:", books.shape)
 
 4️⃣ Memfilter Data dengan Rating Cukup
 - Memastikan hanya buku yang memiliki minimal 5 rating yang digunakan agar data lebih valid.
+  
 ```
 book_counts = books.groupby('ISBN')['Book-Rating'].count()
 books = books[books['ISBN'].isin(book_counts[book_counts >= 5].index)]
@@ -181,7 +183,8 @@ Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 
 5️⃣ Ekstraksi Fitur dengan TF-IDF
 
-- Ekstraksi fitur dilakukan untuk merepresentasikan teks dalam bentuk numerik menggunakan TF-IDF. Hal ini membantu dalam menemukan buku dengan kemiripan teks berdasarkan judul atau deskripsi buku.
+- Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
+  
 ```
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -198,9 +201,9 @@ TF-IDF Matrix Shape: (670480, 21731)
 * TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
 
 6️⃣ Persiapan Data untuk Collaborative Filtering
-- Membentuk user-item matrix dari dataset rating.
+
 - Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
-- Melakukan normalisasi rating agar performa model lebih baik.
+  
 ```
 from surprise import SVD, Dataset, Reader
 from surprise.model_selection import train_test_split
@@ -283,7 +286,7 @@ Pada bagian ini digunakan dua pendekatan utama:
 
 :sparkles: Content-Based Filtering → Mencari buku serupa berdasarkan fitur judul.
 
-:sparkles: Collaborative Filtering (Matrix Factorization) → Memprediksi rating berdasarkan pola rating pengguna lain.
+:sparkles: Collaborative Filtering (SVD) → Memprediksi rating berdasarkan pola rating pengguna lain.
  
 📖 Content-Based Filtering
 - Menggunakan Nearest Neighbors untuk mencari buku serupa berdasarkan fitur judul buku.
@@ -369,10 +372,13 @@ print("RMSE Score (SVD):", rmse)
 RMSE: 1.2406
 RMSE Score (SVD): 1.2406265591732735
 ``
+📌 Kesimpulan:
 
-:boom: Model SVD dilatih menggunakan dataset.
+* Content-Based Filtering cocok untuk rekomendasi berbasis metadata buku.
 
-:boom: Digunakan RMSE untuk mengevaluasi akurasi model.
+* Collaborative Filtering lebih efektif dalam memberikan rekomendasi yang personal.
+
+* SVD menghasilkan RMSE yang lebih rendah, menunjukkan performa yang lebih stabil dibanding Content-Based Filtering.
 
 **2. Evaluasi Neural Network-Based Recommender**
 - Menggunakan RMSE dari model.fit() untuk melihat performa Neural Network.
