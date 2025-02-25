@@ -195,6 +195,9 @@ print("TF-IDF Matrix Shape:", tfidf_matrix.shape)
 TF-IDF Matrix Shape: (670480, 21731)
 ``
 
+✔ **Hasil Ekstraksi TF-IDF**  
+TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
+
 6️⃣ Persiapan Data untuk Collaborative Filtering
 - Membentuk user-item matrix dari dataset rating.
 - Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
@@ -343,6 +346,9 @@ print("RMSE Score (SVD):", rmse)
 💡 Formula RMSE:
 
 ![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
+
+✔ **Arsitektur Neural Network**  
+Model menggunakan embedding layer untuk mengonversi user dan buku ke dalam vektor laten. Aktivasi **ReLU** digunakan karena sifatnya yang non-linear, sehingga model bisa menangkap pola hubungan lebih kompleks dibanding pendekatan linear.
 
 ```
 # Prepare data for the neural network
