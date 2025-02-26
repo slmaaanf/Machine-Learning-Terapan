@@ -359,7 +359,7 @@ model = SVD()
 cross_validate(model, data, cv=5, verbose=True)
 ```
 
-![image](https://github.com/user-attachments/assets/010483c7-1110-4452-9b86-506a3f8512b5)
+![image](https://github.com/user-attachments/assets/2c77c76c-da63-402a-9496-0fa5889d7ec5)
 
 ### ▶ **Hasil Rekomendasi Buku**
 - Top-N Rekomendasi Buku (Collaborative Filtering - SVD)
