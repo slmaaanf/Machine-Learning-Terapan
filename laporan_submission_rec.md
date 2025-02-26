@@ -315,6 +315,14 @@ Pada bagian ini digunakan dua pendekatan utama:
   * TF-IDF Vectorization → Mengubah teks judul buku menjadi representasi numerik.
   * k-Nearest Neighbors (k-NN) → Menggunakan metrik cosine similarity untuk mencari buku yang paling mirip.
 ```
+## Content-Based Filtering
+
+tfidf = TfidfVectorizer(stop_words='english') # Initialize TfidfVectorizer
+tfidf_matrix = tfidf.fit_transform(books['Book-Title']) # Fit and transform book titles
+
+nn = NearestNeighbors(metric='cosine', algorithm='brute') # Initialize NearestNeighbors
+nn.fit(tfidf_matrix) # Fit the TF-IDF matrix
+
 # Function to recommend books
 def recommend_books_nn(title, n=5):
     if title not in books['Book-Title'].values:
@@ -330,6 +338,9 @@ recommend_books_nn("A Painted House")
 ```
 ![image](https://github.com/user-attachments/assets/6bf7da17-8858-4861-ab50-518311c88ae9)
 
+🔹 Keunggulan: Tidak memerlukan data pengguna lain.
+
+🔹 Kelemahan: Terbatas pada metadata yang tersedia.
 
 🔎 Collaborative Filtering (Matrix Factorization - SVD)
 
@@ -348,22 +359,22 @@ model = SVD()
 cross_validate(model, data, cv=5, verbose=True)
 ```
 
-![image](https://github.com/user-attachments/assets/35c8a1ea-36a7-4adc-b3c7-d2d71c47283b)
+![image](https://github.com/user-attachments/assets/010483c7-1110-4452-9b86-506a3f8512b5)
 
 ### ▶ **Hasil Rekomendasi Buku**
 - Top-N Rekomendasi Buku (Collaborative Filtering - SVD)
   
   | Judul Buku | ISBN | Prediced Rating |
   | ------ | ----- | ------ |
-  | Walk Two Moons | 0064405176 | 10.00 |
   | Der Kleine Hobbit | 3423071516 | 10.00 |
-  | Mit dem KÃ?Â¼hlschrank durch Irland | 3442446414 | 10.00 |
-  | Harry Potter und der Gefangene von Azkaban | 3551551693 | 10.00 |
-  | Die Zwei Turme II | 3608935428 | 10.00 |
+  | Harry Potter und der Gefangene von Azkaban |  3551551693 | 10.00 |
+  | Die Gefahrten I | 360893541X | 10.00 |
+  | Die Wiederkehr Des Konigs III | 3608935436 | 10.00 |
+  | Ender's Game (Ender Wiggins Saga (Paperback)) | 0812533550 | 10.00 |
 
-  🔹 Keunggulan: Mampu memberikan rekomendasi personal.
-  
-  🔹 Kelemahan: Membutuhkan data interaksi yang cukup.
+🔹 Keunggulan: Mampu memberikan rekomendasi personal.
+
+🔹 Kelemahan: Membutuhkan data interaksi yang cukup.
 
 ### **Kelebihan & Kekurangan**
 | Pendekatan                | Kelebihan                                    | Kekurangan                                    |
@@ -372,7 +383,32 @@ cross_validate(model, data, cv=5, verbose=True)
 | **Collaborative Filtering** | Mampu memberikan rekomendasi personal | Membutuhkan data interaksi yang cukup |
 
 ## Evaluation Model 
-**1. Evaluasi Collaborative Filtering (SVD)**
+**1. Evaluasi Content-Based Filtering**
+* Menggunakan Cosine Similarity untuk mengukur kesamaan antara buku berdasarkan metadata (judul, genre, deskripsi, dll.).
+* Metrik evaluasi yang digunakan: Precision@K dan Recall@K untuk mengukur relevansi rekomendasi.
+
+Formula Cosine Similarity:
+![image](https://github.com/user-attachments/assets/ec77fda9-1bb1-4ba8-af12-2084a70cdd28)
+
+Hasil Evaluasi:
+
+📌 Cosine Similarity menunjukkan bahwa buku dengan genre atau deskripsi yang mirip memiliki skor kemiripan yang lebih tinggi.
+
+📌 Precision@K: 0.5, artinya 50% dari buku yang direkomendasikan memang relevan dengan preferensi pengguna.
+
+📌 Recall@K: 0.5, menunjukkan bahwa 50% dari buku yang relevan berhasil ditemukan oleh sistem rekomendasi.
+
+![image](https://github.com/user-attachments/assets/346525ac-5d69-415b-8d88-5210fad1b992)
+
+Kesimpulan:
+
+✔ Content-Based Filtering mampu merekomendasikan buku dengan karakteristik serupa berdasarkan metadata seperti genre dan deskripsi.
+
+✔ Precision dan Recall bernilai sama (0.5), yang menunjukkan bahwa sistem cukup baik dalam menemukan buku yang relevan, tetapi masih ada ruang untuk perbaikan agar lebih optimal.
+
+✔ Bisa ditingkatkan dengan hybrid approach yang mengombinasikan Content-Based dan Collaborative Filtering.
+
+**2. Evaluasi Collaborative Filtering (SVD)**
 - Evaluasi dilakukan menggunakan Root Mean Squared Error (RMSE) untuk mengukur error antara rating asli dan prediksi.
 
 **Hasil Evaluasi:**
@@ -381,17 +417,16 @@ cross_validate(model, data, cv=5, verbose=True)
 RMSE: 1.2406
 RMSE Score (SVD): 1.2406265591732735
 ``
-Semakin rendah nilai RMSE, semakin baik model dalam memprediksi rating pengguna.
+
+Hasil evaluasi RMSE: 1.2406, menunjukkan performa model cukup baik.
 
 📌 Kesimpulan:
 
-* Content-Based Filtering cocok untuk rekomendasi berbasis metadata buku.
+* SVD dengan RMSE 1.2406 menunjukkan performa yang cukup baik, tetapi masih ada ruang untuk perbaikan.
+*  Model ini lebih unggul dalam memberikan rekomendasi personal dibanding Content-Based Filtering, karena mempertimbangkan pola interaksi pengguna secara lebih mendalam.
+* Meskipun begitu, model masih memiliki error yang cukup signifikan, sehingga bisa dieksplorasi lebih lanjut dengan optimasi parameter atau metode hybrid.
 
-* Collaborative Filtering lebih efektif dalam memberikan rekomendasi yang personal.
-
-* SVD menghasilkan RMSE yang lebih rendah, menunjukkan performa yang lebih stabil dibanding Content-Based Filtering.
-
-**2. Evaluasi Neural Network-Based Recommender**
+**3. Evaluasi Neural Network-Based Recommender**
 - Evaluasi dilakukan dengan melihat RMSE dari training dan validation loss.
 
 📌 Analisis Hasil Evaluasi:
@@ -407,7 +442,7 @@ Semakin rendah nilai RMSE, semakin baik model dalam memprediksi rating pengguna.
 
 ![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
 
-![image](https://github.com/user-attachments/assets/3b798017-7141-4ebf-8e4f-a8101b59de78)
+![image](https://github.com/user-attachments/assets/0916d84a-4789-47b6-b49c-3417e9ff886c)
 
 💡 Visualisasi Evaluasi
 
@@ -417,7 +452,7 @@ Berdasarkan grafik RMSE:
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
 
-![image](https://github.com/user-attachments/assets/191f5eda-9cba-4c7a-a808-a7b0e033f1d4)
+![image](https://github.com/user-attachments/assets/78d4ae61-5ef1-4e46-9ba7-dbf00ec7fc68)
 
 📊 Rekomendasi:
 * Perlu dilakukan tuning hyperparameter lebih lanjut.
