@@ -65,6 +65,26 @@ ratings = pd.read_csv(dataset_path + "/Ratings.csv")
 - **Location**: Tempat tinggal pengguna berdasarkan informasi yang diberikan saat registrasi. Bisa berupa kota atau negara.
 - **Age**: Usia pengguna dalam tahun, yang digunakan untuk memahami demografi pembaca.
 
+🔍 Kondisi Data
+
+1. Missing Values
+
+* Users: Kolom `Age` memiliki nilai yang hilang.
+* Books: Tidak ditemukan missing values.
+* Ratings: Tidak ditemukan missing values.
+
+2. Duplikat Data
+
+* Books: Ditemukan beberapa ISBN yang memiliki entri ganda dengan informasi berbeda.
+* Users & Ratings: Tidak ditemukan duplikasi pada User-ID dan kombinasi User-ID & ISBN.
+
+3. Outlier
+
+* Age: Terdapat nilai yang tidak realistis seperti usia 0 dan lebih dari 100 tahun.
+* Book-Rating: Beberapa rating berada di luar rentang yang diharapkan (1-10).
+
+Hasil analisis ini menunjukkan bahwa perlu dilakukan penanganan lebih lanjut pada tahap Data Preparation untuk mengatasi missing values, duplikasi, dan outlier.
+
 🔍 Eksplorasi Data
 
 ✔ Memeriksa jumlah total pengguna, buku, dan rating.
@@ -289,12 +309,11 @@ Pada bagian ini digunakan dua pendekatan utama:
 :sparkles: Collaborative Filtering (SVD) → Memprediksi rating berdasarkan pola rating pengguna lain.
  
 📖 Content-Based Filtering
-- Menggunakan Nearest Neighbors untuk mencari buku serupa berdasarkan fitur judul buku.
+- Pendekatan ini menggunakan TF-IDF (Term Frequency-Inverse Document Frequency) untuk merepresentasikan fitur judul buku dalam bentuk vektor. Kemudian, algoritma Nearest Neighbors (k-NN) digunakan untuk menemukan buku serupa berdasarkan kemiripan vektor judul buku.
   
-  ✔ Arsitektur Neural Network
-  * Embedding layer digunakan untuk mengonversi user & buku ke dalam vektor laten.
-  * ReLU activation membantu menangkap pola hubungan lebih kompleks.
-
+  ✔ Tahapan Model:
+  * TF-IDF Vectorization → Mengubah teks judul buku menjadi representasi numerik.
+  * k-Nearest Neighbors (k-NN) → Menggunakan metrik cosine similarity untuk mencari buku yang paling mirip.
 ```
 # Function to recommend books
 def recommend_books_nn(title, n=5):
@@ -314,8 +333,13 @@ recommend_books_nn("A Painted House")
 
 🔎 Collaborative Filtering (Matrix Factorization - SVD)
 
-- Menggunakan metode Singular Value Decomposition (SVD) untuk mendekomposisi matriks pengguna-buku dan memprediksi rating.
+- Pendekatan ini menggunakan Singular Value Decomposition (SVD) untuk mendekomposisi matriks pengguna-buku dan memprediksi rating buku berdasarkan pola rating pengguna lain.
 
+  ✔ Tahapan Model:
+  * Data Preprocessing → Menyiapkan dataset rating pengguna.
+  * Matrix Factorization (SVD) → Mendekomposisi matriks pengguna-buku untuk menangkap pola laten.
+  * Cross Validation → Mengukur performa model dengan RMSE dan MAE.
+    
 ```
 ## Collaborative Filtering (Matrix Factorization)
 reader = Reader(rating_scale=(1, 10))
@@ -337,6 +361,10 @@ cross_validate(model, data, cv=5, verbose=True)
   | Harry Potter und der Gefangene von Azkaban | 3551551693 | 10.00 |
   | Die Zwei Turme II | 3608935428 | 10.00 |
 
+  🔹 Keunggulan: Mampu memberikan rekomendasi personal.
+  
+  🔹 Kelemahan: Membutuhkan data interaksi yang cukup.
+
 ### **Kelebihan & Kekurangan**
 | Pendekatan                | Kelebihan                                    | Kekurangan                                    |
 |---------------------------|----------------------------------------------|----------------------------------------------|
@@ -345,33 +373,15 @@ cross_validate(model, data, cv=5, verbose=True)
 
 ## Evaluation Model 
 **1. Evaluasi Collaborative Filtering (SVD)**
-- Menggunakan RMSE untuk mengukur error antara rating asli dan prediksi.
-  
-```
-from surprise import accuracy
-from surprise import SVD
+- Evaluasi dilakukan menggunakan Root Mean Squared Error (RMSE) untuk mengukur error antara rating asli dan prediksi.
 
-# Load data
-reader = Reader(rating_scale=(1, 10))
-data = Dataset.load_from_df(ratings[['User-ID', 'ISBN', 'Book-Rating']], reader)
+**Hasil Evaluasi:**
 
-# Train model
-trainset = data.build_full_trainset()
-model = SVD()
-model.fit(trainset)
-
-# Predictions
-predictions = model.test(trainset.build_testset())
-
-# RMSE Evaluation
-rmse = accuracy.rmse(predictions)
-print("RMSE Score (SVD):", rmse)
-
-```
 ``
 RMSE: 1.2406
 RMSE Score (SVD): 1.2406265591732735
 ``
+Semakin rendah nilai RMSE, semakin baik model dalam memprediksi rating pengguna.
 
 📌 Kesimpulan:
 
@@ -382,90 +392,21 @@ RMSE Score (SVD): 1.2406265591732735
 * SVD menghasilkan RMSE yang lebih rendah, menunjukkan performa yang lebih stabil dibanding Content-Based Filtering.
 
 **2. Evaluasi Neural Network-Based Recommender**
-- Menggunakan RMSE dari model.fit() untuk melihat performa Neural Network.
-- Jika train RMSE terus menurun tetapi validation RMSE tetap tinggi, berarti model mengalami overfitting.
-  
-✔ Solusi untuk Overfitting:
-    - Menambahkan dropout layer dalam arsitektur model.
-    - Menggunakan regularisasi L2 pada dense layer.
-    - Melakukan hyperparameter tuning pada jumlah neuron dan learning rate.
+- Evaluasi dilakukan dengan melihat RMSE dari training dan validation loss.
 
+📌 Analisis Hasil Evaluasi:
+* Jika Train RMSE menurun tetapi Validation RMSE tetap tinggi, berarti model mengalami overfitting.
+* Perlu dilakukan regularisasi tambahan atau tuning hyperparameter agar model tidak terlalu menyesuaikan data pelatihan.
+
+✔ Solusi untuk Overfitting:
+* Menambahkan dropout layer dalam arsitektur model.
+* Menggunakan regularisasi L2 pada dense layer.
+* Melakukan hyperparameter tuning pada jumlah neuron dan learning rate.
+  
 💡 Formula RMSE:
 
 ![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
 
-```
-# Prepare data for the neural network
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-from sklearn.model_selection import train_test_split
-
-# Mapping user dan book ID ke indeks numerik
-user_ids = ratings['User-ID'].unique()
-book_isbns = ratings['ISBN'].unique()
-
-user_mapping = {user_id: index for index, user_id in enumerate(user_ids)}
-book_mapping = {isbn: index for index, isbn in enumerate(book_isbns)}
-
-ratings['User-ID'] = ratings['User-ID'].map(user_mapping)
-ratings['ISBN'] = ratings['ISBN'].map(book_mapping)
-
-num_users = len(user_ids)
-num_books = len(book_isbns)
-
-# Membagi dataset
-X = ratings[['User-ID', 'ISBN']].values
-y = ratings['Book-Rating'].values
-x_train, x_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Define the neural network model
-user_input = keras.Input(shape=(1,), name='user_id')
-book_input = keras.Input(shape=(1,), name='isbn')
-
-# Embedding layers
-user_embedding = layers.Embedding(input_dim=num_users, output_dim=50, input_length=1)(user_input)
-book_embedding = layers.Embedding(input_dim=num_books, output_dim=50, input_length=1)(book_input)
-
-# Flatten sebelum concatenate
-user_embedding = layers.Flatten()(user_embedding)
-book_embedding = layers.Flatten()(book_embedding)
-
-# Menggabungkan embeddings
-merged = layers.concatenate([user_embedding, book_embedding])
-
-# Dense layers
-dense1 = layers.Dense(128, activation='relu')(merged)
-dense2 = layers.Dense(64, activation='relu')(dense1)
-
-# Menambahkan Dropout
-dropout = layers.Dropout(0.2)(dense2)
-
-# Output layer (gunakan aktivasi sigmoid jika rating memiliki rentang tetap)
-output = layers.Dense(1, activation='sigmoid')(dropout)
-
-# Define Model
-model = keras.Model(inputs=[user_input, book_input], outputs=output)
-
-# Compile the model
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=[tf.keras.metrics.RootMeanSquaredError()])
-
-# Menggunakan Early Stopping
-early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
-
-# Training model
-history = model.fit(
-    x=[x_train[:, 0], x_train[:, 1]], y=y_train,
-    epochs=10,
-    batch_size=32,
-    validation_data=([x_val[:, 0], x_val[:, 1]], y_val),
-    callbacks=[early_stopping]
-)
-
-# Menampilkan ringkasan model
-model.summary()
-
-```
 ![image](https://github.com/user-attachments/assets/3b798017-7141-4ebf-8e4f-a8101b59de78)
 
 💡 Visualisasi Evaluasi
@@ -476,21 +417,11 @@ Berdasarkan grafik RMSE:
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
 
-✔ Perlu dilakukan regularisasi tambahan atau tuning hyperparameter agar model tidak terlalu menyesuaikan data pelatihan.
-
-```
-#Visualisasi Evaluasi
-plt.figure(figsize=(10, 5))
-sns.set_style("whitegrid")
-plt.plot(history.history['root_mean_squared_error'], marker="o", linestyle="-", color="b", label="Train RMSE")
-plt.plot(history.history['val_root_mean_squared_error'], marker="s", linestyle="--", color="r", label="Validation RMSE")
-plt.xlabel("Epochs")
-plt.ylabel("RMSE")
-plt.title("Evaluasi RMSE Model")
-plt.legend()
-plt.show()
-```
 ![image](https://github.com/user-attachments/assets/191f5eda-9cba-4c7a-a808-a7b0e033f1d4)
+
+📊 Rekomendasi:
+* Perlu dilakukan tuning hyperparameter lebih lanjut.
+* Menggunakan teknik dropout dan regularisasi untuk meningkatkan generalisasi model.
 
 # Kesimpulan
 
