@@ -125,33 +125,17 @@ EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta 
   Hasil EDA ini membantu dalam mempersiapkan data sebelum pemodelan. 🚀
 
 ## Data Preparation
-**1. Tahap Preprocessing**
+Tahapan data preparation dilakukan secara bertahap untuk memastikan kualitas dataset sebelum masuk ke tahap pemodelan.
 
-✔ Cleaning Data: Menghapus nilai yang hilang dan duplikasi.
+:pushpin: Pembersihan Data
 
-✔ Menggabungkan Data: Menggabungkan data rating dengan book berdasarkan ISBN.
+Langkah pertama adalah membersihkan data dengan cara:
 
-✔ Menangani Missing Values: Mengecek dan menghapus nilai yang hilang setelah penggabungan.
+✔ Menghapus duplikasi agar tidak terjadi bias dalam rekomendasi.
 
-✔ Memfilter Data: Memilih hanya buku dengan jumlah rating cukup (minimal 5 review).
+✔ Menangani missing values yang ada pada kolom `Book-Author` dan `Publisher`.
 
-**2. Tahap Pembagian Data (train-test-split)**
-
-✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering .
-
-**3. Tahap Ekstraksi Fitur**
-
-✔ Ekstraksi Fitur dengan TF-IDF: Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
-
-**4. Hasil Akhir**
-
-✔ Hasil Akhir Data: Menampilkan dataset yang sudah dibersihkan dan siap digunakan untuk pemodelan.
-
-:pushpin: Tahap Preprocessing
-
-1️⃣ Cleaning Data (Menghapus duplikasi & nilai yang hilang)
-- Menghapus duplikasi pada dataset.
-- Mengecek dan menghapus nilai yang hilang pada kolom Book-Author dan Publisher.
+ ✔ Mengatasi outlier pada kolom `Age` dengan membatasi rentang usia yang masuk akal (misalnya, 5 hingga 100 tahun).
 
 ```
 # Menghapus duplikasi
@@ -171,8 +155,9 @@ print("Data setelah menghapus missing values:", books.shape)
 
 ![missing](https://github.com/user-attachments/assets/39a96833-92ae-4b13-a27d-ea3cc687914c)
 
-2️⃣ Menggabungkan Data (Rating + Books)
-- Menggabungkan data ratings dengan books berdasarkan ISBN agar setiap rating memiliki informasi buku yang sesuai.
+:pushpin: Menggabungkan Data 
+
+Setelah data dibersihkan, langkah selanjutnya adalah menggabungkan tabel ratings dengan books berdasarkan ISBN.
 
 ```
 # Menggabungkan dataframe ratings dengan books berdasarkan nilai ISBN
@@ -181,7 +166,8 @@ books
 ```
 ![gabung](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
 
-3️⃣ Menangani Missing Values Setelah Penggabungan
+* Menangani Missing Values Setelah Penggabungan
+
 - Mengecek kembali apakah ada missing values setelah penggabungan.
 - Menghapusnya jika diperlukan.
   
@@ -195,8 +181,9 @@ print("Data setelah menghapus missing values:", books.shape)
 
 ![value](https://github.com/user-attachments/assets/066054ec-9cbb-4df1-878b-45a11881ea25)
 
-4️⃣ Memfilter Data dengan Rating Cukup
-- Memastikan hanya buku yang memiliki minimal 5 rating yang digunakan agar data lebih valid.
+:pushpin: Memfilter Data dengan Rating Cukup
+
+Agar data lebih valid, hanya buku yang memiliki minimal 5 rating yang digunakan
   
 ```
 book_counts = books.groupby('ISBN')['Book-Rating'].count()
@@ -209,13 +196,9 @@ print("Jumlah data setelah memfilter buku dengan minimal 5 rating:", books.shape
 ``
 Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 ``
-:pushpin: Tahap Pembagian Data (train-test-split)
+:pushpin: Tahap Pembagian Data (train-test-split) 
 
-5️⃣ Persiapan Data untuk Collaborative Filtering
-
-- Dataset dibagi menjadi data latih dan data uji menggunakan train-test-split dengan rasio 80:20. Data latih digunakan untuk melatih model SVD, sementara data uji digunakan untuk mengukur performa model menggunakan RMSE.
-- Data rating diubah menjadi format yang dapat digunakan oleh Surprise dengan `Reader`, yang memastikan bahwa skala rating sesuai dengan dataset yang digunakan.
-- Model SVD dipilih karena merupakan salah satu teknik dekomposisi matriks yang efektif dalam menangani data sparse pada sistem rekomendasi berbasis Collaborative Filtering.
+Dataset dibagi menjadi data latih dan data uji menggunakan train-test-split dengan rasio 80:20 untuk **Collaborative Filtering**.
   
 ```
 from surprise import SVD, Dataset, Reader
@@ -246,11 +229,9 @@ RMSE: 3.6694
 SVD with Surprise RMSE: 3.669365879489593
 ``
 
-:pushpin: Tahap Ekstraksi Fitur
+:pushpin: Ekstraksi Fitur untuk Content-Based Filtering
 
-6️⃣  Ekstraksi Fitur dengan TF-IDF
-
-- Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
+Menggunakan TF-IDF untuk mengubah judul buku menjadi representasi numerik.
   
 ```
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -267,10 +248,9 @@ TF-IDF Matrix Shape: (670480, 21731)
 ✔ **Hasil Ekstraksi TF-IDF**  
 * TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
 
-:pushpin: Hasil Akhir 
+:pushpin: Hasil Akhir Data Setelah Dibersihkan
 
-7️⃣ Hasil Akhir Data Setelah Dibersihkan
-- Setelah semua tahapan data preparation dilakukan, dataset siap digunakan untuk pemodelan rekomendasi.
+Setelah semua tahapan data preparation dilakukan, dataset siap digunakan untuk pemodelan rekomendasi.
 ```
 print("\nJumlah data setelah pembersihan:")
 print(f"Books: {books.shape[0]} baris")
@@ -280,7 +260,7 @@ print(f"Ratings: {ratings.shape[0]} baris")
 
 ![hasil](https://github.com/user-attachments/assets/b75b4979-04b1-411b-a2c2-13c49a22e132)
 
-:pushpin: Kesimpulan
+🔹 **Kesimpulan**
 
 ✅ Tahapan data preparation berhasil meningkatkan kualitas dataset dengan:
 * Menghapus duplikasi untuk mencegah bias dalam rekomendasi.
