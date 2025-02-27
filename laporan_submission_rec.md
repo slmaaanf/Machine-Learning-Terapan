@@ -148,12 +148,17 @@ print("Missing Values sebelum dibersihkan:\n", books.isnull().sum())
 books.dropna(inplace=True)
 
 print("Missing Values setelah dibersihkan:\n", books.isnull().sum())
-print("Data setelah menghapus missing values:", books.shape)
+
+# Mengatasi outlier pada kolom Age di dataframe users
+users = users[(users['Age'] >= 5) & (users['Age'] <= 100)]
+print("Jumlah data setelah membatasi rentang usia:\n", users.shape)
 
 ```
-:exclamation: Terdapat missing value di bagian Book-Author dan Publisher.
+:exclamation: 
+* Terdapat missing value di bagian Book-Author dan Publisher.
+* Jumlah data setelah membatasi rentang usia: (166848, 3)
 
-![missing](https://github.com/user-attachments/assets/39a96833-92ae-4b13-a27d-ea3cc687914c)
+![mis](https://github.com/user-attachments/assets/e167bf6d-49ba-4775-ae26-e75bc359263c)
 
 :pushpin: Menggabungkan Data 
 
@@ -166,7 +171,7 @@ books
 ```
 ![gabung](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
 
-* Menangani Missing Values Setelah Penggabungan
+▶ Menangani Missing Values Setelah Penggabungan
 
 - Mengecek kembali apakah ada missing values setelah penggabungan.
 - Menghapusnya jika diperlukan.
@@ -196,6 +201,7 @@ print("Jumlah data setelah memfilter buku dengan minimal 5 rating:", books.shape
 ``
 Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 ``
+
 :pushpin: Tahap Pembagian Data (train-test-split) 
 
 Dataset dibagi menjadi data latih dan data uji menggunakan train-test-split dengan rasio 80:20 untuk **Collaborative Filtering**.
