@@ -4,7 +4,7 @@
 
 ![Books](https://github.com/user-attachments/assets/44b105d4-843b-48b0-932e-8812eb447fc8)
 
-Beragamnya jenis buku dan banyaknya jumlah buku merupakan permasalahan tersendiri bagi para pembaca buku. Salah satu permasalahan yang muncul adalah saat pembaca kesulitan dalam menentukan buku yang akan dibaca selanjutnya. Sistem rekomendasi buku sangat penting dalam era digital karena membantu pengguna menemukan buku yang sesuai dengan preferensi mereka. Proyek ini bertujuan untuk membangun sistem rekomendasi buku menggunakan **Content-Based Filtering, Collaborative Filtering, dan Neural Network-Based Recommender System** dengan dataset dari Kaggle.
+Beragamnya jenis buku dan banyaknya jumlah buku merupakan permasalahan tersendiri bagi para pembaca buku. Salah satu permasalahan yang muncul adalah saat pembaca kesulitan dalam menentukan buku yang akan dibaca selanjutnya. Sistem  rekomendasi  memungkinkan  pengguna untuk dengan mudah menemukan referensi baru mengenai buku yang sesuai dengan kategori buku yang disukai oleh pembaca sebelumnya. Selain itu, sistem rekomendasi juga memiliki peran penting dalam banyak aplikasi online dan dapat memengaruhi kesuksesan  komersial  perusahaan  serta  kepuasan  pengguna. Proyek ini bertujuan untuk membangun sistem rekomendasi buku menggunakan **Content-Based Filtering, Collaborative Filtering, dan Neural Network-Based Recommender System** dengan dataset dari Kaggle.
 
 💡 Manfaat Proyek:
 
@@ -14,17 +14,17 @@ Beragamnya jenis buku dan banyaknya jumlah buku merupakan permasalahan tersendir
 
 ✔ Menggunakan metode berbasis konten dan kolaboratif untuk rekomendasi yang lebih akurat.
 
-  Format Referensi: [SISTEM REKOMENDASI BUKU](http://eprints.undip.ac.id/65823/) 
+  Format Referensi: [SISTEM REKOMENDASI BUKU](https://ejurnal.umri.ac.id/index.php/coscitech/article/view/5131)
 
 ## Business Understanding
 
 📝 Problem Statements
-Bagaimana sistem rekomendasi dapat membantu pengguna menemukan buku yang sesuai dengan preferensinya?
-Seberapa efektif metode Content-Based Filtering dibandingkan dengan Collaborative Filtering dalam merekomendasikan buku?
+* Bagaimana sistem rekomendasi dapat membantu pengguna menemukan buku yang sesuai dengan preferensinya?
+* Seberapa efektif metode Content-Based Filtering dibandingkan dengan Collaborative Filtering dalam merekomendasikan buku?
 
 🎯 Goals
-Mengembangkan sistem rekomendasi yang dapat menyarankan buku berdasarkan preferensi pengguna.
-Membandingkan performa Content-Based Filtering dan Collaborative Filtering untuk memahami pendekatan terbaik.
+* Mengembangkan sistem rekomendasi yang dapat menyarankan buku berdasarkan preferensi pengguna.
+* Membandingkan performa Content-Based Filtering dan Collaborative Filtering untuk memahami pendekatan terbaik.
 
 🛠 Solution Approach
 
@@ -213,7 +213,9 @@ Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 
 5️⃣ Persiapan Data untuk Collaborative Filtering
 
-- Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
+- Dataset dibagi menjadi data latih dan data uji menggunakan train-test-split dengan rasio 80:20. Data latih digunakan untuk melatih model SVD, sementara data uji digunakan untuk mengukur performa model menggunakan RMSE.
+- Data rating diubah menjadi format yang dapat digunakan oleh Surprise dengan `Reader`, yang memastikan bahwa skala rating sesuai dengan dataset yang digunakan.
+- Model SVD dipilih karena merupakan salah satu teknik dekomposisi matriks yang efektif dalam menangani data sparse pada sistem rekomendasi berbasis Collaborative Filtering.
   
 ```
 from surprise import SVD, Dataset, Reader
@@ -280,16 +282,19 @@ print(f"Ratings: {ratings.shape[0]} baris")
 
 :pushpin: Kesimpulan
 
-✅ Tahapan data preparation berhasil membersihkan dataset dengan:
-
-* Menghapus duplikasi.
-
-* Menangani nilai yang hilang.
-
-* Memastikan hanya buku dengan jumlah rating yang memadai digunakan dalam model.
+✅ Tahapan data preparation berhasil meningkatkan kualitas dataset dengan:
+* Menghapus duplikasi untuk mencegah bias dalam rekomendasi.
+* Menangani nilai yang hilang agar data lebih bersih dan akurat.
+* Memastikan hanya buku dengan jumlah rating yang memadai digunakan dalam model, sehingga rekomendasi lebih relevan.
 
 📌 Manfaat:
-Hal ini memastikan bahwa model rekomendasi akan bekerja dengan data yang lebih akurat dan relevan.
+
+Tahapan ini memastikan bahwa model rekomendasi hanya menggunakan data yang valid, bersih, dan berkualitas tinggi. Dengan demikian, hasil rekomendasi menjadi lebih akurat dan dapat dipercaya.
+
+🔹 Alasan perbaikan:
+
+* Menambahkan sedikit detail tentang manfaat setiap langkah agar lebih jelas.
+* Menggunakan kata-kata yang lebih tegas untuk menunjukkan dampaknya pada model rekomendasi.
   
 ## **Modeling and Results**
 
@@ -329,7 +334,7 @@ def recommend_books_nn(title, n=5):
 # Example recommendation
 recommend_books_nn("A Painted House")
 ```
-![image](https://github.com/user-attachments/assets/6bf7da17-8858-4861-ab50-518311c88ae9)
+![rec](https://github.com/user-attachments/assets/6bf7da17-8858-4861-ab50-518311c88ae9)
 
 🔹 Keunggulan: Tidak memerlukan data pengguna lain.
 
@@ -351,8 +356,7 @@ data = Dataset.load_from_df(ratings[['User-ID', 'ISBN', 'Book-Rating']], reader)
 model = SVD()
 cross_validate(model, data, cv=5, verbose=True)
 ```
-
-![image](https://github.com/user-attachments/assets/2c77c76c-da63-402a-9496-0fa5889d7ec5)
+![fil](https://github.com/user-attachments/assets/ff63da32-b124-473d-bedc-2f2c1b9ab814)
 
  ▶ **Hasil Rekomendasi Buku**
  - Top-N Rekomendasi Buku (Content-Based Filtering)
@@ -369,11 +373,11 @@ cross_validate(model, data, cv=5, verbose=True)
   
   | Judul Buku | ISBN | Prediced Rating |
   | ------ | ----- | ------ |
-  | Der Kleine Hobbit | 3423071516 | 10.00 |
+  | Harry Potter und der Stein der Weisen | 3551551677 | 10.00 |
   | Harry Potter und der Gefangene von Azkaban |  3551551693 | 10.00 |
+  | Harry Potter Und Der Feuerkelch | 3551551936 | 10.00 |
   | Die Gefahrten I | 360893541X | 10.00 |
-  | Die Wiederkehr Des Konigs III | 3608935436 | 10.00 |
-  | Ender's Game (Ender Wiggins Saga (Paperback)) | 0812533550 | 10.00 |
+  | Die Zwei Turme II | 3608935428 | 10.00 |
 
 🔹 Keunggulan: Mampu memberikan rekomendasi personal.
 
@@ -455,7 +459,7 @@ Berdasarkan grafik RMSE:
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
 
-![visual](https://github.com/user-attachments/assets/78d4ae61-5ef1-4e46-9ba7-dbf00ec7fc68)
+![vis](https://github.com/user-attachments/assets/169ffa7a-0f93-42d6-89ea-a05ea57d1922)
 
 📊 Rekomendasi:
 * Perlu dilakukan tuning hyperparameter lebih lanjut.
