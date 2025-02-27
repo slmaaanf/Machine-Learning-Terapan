@@ -154,9 +154,9 @@ users = users[(users['Age'] >= 5) & (users['Age'] <= 100)]
 print("Jumlah data setelah membatasi rentang usia:\n", users.shape)
 
 ```
-:exclamation: 
-* Terdapat missing value di bagian Book-Author dan Publisher.
-* Jumlah data setelah membatasi rentang usia: (166848, 3)
+``Terdapat missing value di bagian Book-Author dan Publisher.``
+
+``Jumlah data setelah membatasi rentang usia: (166848, 3)``
 
 ![mis](https://github.com/user-attachments/assets/e167bf6d-49ba-4775-ae26-e75bc359263c)
 
@@ -173,8 +173,17 @@ books
 
 ▶ Menangani Missing Values Setelah Penggabungan
 
-- Mengecek kembali apakah ada missing values setelah penggabungan.
-- Menghapusnya jika diperlukan.
+Setelah tabel ratings digabungkan dengan books, kita perlu memastikan bahwa tidak ada missing values yang tersisa. Missing values dapat menyebabkan masalah saat analisis atau pemodelan, sehingga perlu ditangani dengan baik.
+
+Langkah-langkah yang dilakukan:
+
+✔ Mengecek jumlah missing values di setiap kolom sebelum dilakukan pembersihan.
+
+✔ Menghapus baris yang mengandung missing values agar data tetap bersih dan akurat.
+
+✔ Memastikan kembali bahwa semua missing values telah dihapus dengan melakukan pengecekan ulang.
+
+✔ Menampilkan bentuk dataset setelah pembersihan, untuk mengetahui berapa banyak data yang tersisa setelah proses ini.
   
 ```
 books.isnull().sum()  # Mengecek jumlah missing values
@@ -183,12 +192,13 @@ books.dropna(inplace=True)  # Menghapus baris dengan missing values jika perlu
 print("Missing Values:\n", books.isnull().sum())
 print("Data setelah menghapus missing values:", books.shape)
 ```
+Hasilnya menampilkan data setelah menghapus missing value : `1031128, 7` Menunjukkan jumlah total data yang tersisa setelah proses penghapusan. 
 
 ![value](https://github.com/user-attachments/assets/066054ec-9cbb-4df1-878b-45a11881ea25)
 
 :pushpin: Memfilter Data dengan Rating Cukup
 
-Agar data lebih valid, hanya buku yang memiliki minimal 5 rating yang digunakan
+Saya memilih minimal 5 rating buku yang direkomendasikan tidak berasal dari buku yang hanya memiliki sedikit pengguna, sehingga hasil rekomendasi lebih akurat dan tidak bias terhadap buku dengan rating rendah.
   
 ```
 book_counts = books.groupby('ISBN')['Book-Rating'].count()
@@ -342,7 +352,7 @@ data = Dataset.load_from_df(ratings[['User-ID', 'ISBN', 'Book-Rating']], reader)
 model = SVD()
 cross_validate(model, data, cv=5, verbose=True)
 ```
-![fil](https://github.com/user-attachments/assets/ff63da32-b124-473d-bedc-2f2c1b9ab814)
+![fil](https://github.com/user-attachments/assets/587f245e-03d5-4018-8700-f50a933b7c27)
 
  ▶ **Hasil Rekomendasi Buku**
  - Top-N Rekomendasi Buku (Content-Based Filtering)
@@ -359,11 +369,11 @@ cross_validate(model, data, cv=5, verbose=True)
   
   | Judul Buku | ISBN | Prediced Rating |
   | ------ | ----- | ------ |
+  | Bridget Jones's Diary | 0330332775 | 10.00 |
+  | The Second Summer of the Sisterhood | 0385729340 | 10.00 |
+  | Der Kleine Hobbit | 3423071516 | 10.00 |
   | Harry Potter und der Stein der Weisen | 3551551677 | 10.00 |
-  | Harry Potter und der Gefangene von Azkaban |  3551551693 | 10.00 |
-  | Harry Potter Und Der Feuerkelch | 3551551936 | 10.00 |
-  | Die Gefahrten I | 360893541X | 10.00 |
-  | Die Zwei Turme II | 3608935428 | 10.00 |
+  | Harry Potter und die Kammer des Schreckens | 3551551685 | 10.00 |
 
 🔹 Keunggulan: Mampu memberikan rekomendasi personal.
 
@@ -445,7 +455,7 @@ Berdasarkan grafik RMSE:
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
 
-![vis](https://github.com/user-attachments/assets/169ffa7a-0f93-42d6-89ea-a05ea57d1922)
+![vis](https://github.com/user-attachments/assets/8d0b8efb-a807-40e1-88d4-c96805f9b641)
 
 📊 Rekomendasi:
 * Perlu dilakukan tuning hyperparameter lebih lanjut.
