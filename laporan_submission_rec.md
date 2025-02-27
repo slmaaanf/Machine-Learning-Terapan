@@ -95,36 +95,37 @@ Hasil analisis ini menunjukkan bahwa perlu dilakukan penanganan lebih lanjut pad
 
 :books: Books 
 
-![image](https://github.com/user-attachments/assets/a83cfdc0-29bc-4026-84cd-b4608b19622f)
+![book](https://github.com/user-attachments/assets/a83cfdc0-29bc-4026-84cd-b4608b19622f)
 
 :chart_with_downwards_trend: Ratings
 
-![image](https://github.com/user-attachments/assets/a42bdce6-2f31-4718-bb5a-3b29cb9bd893)
+![rat](https://github.com/user-attachments/assets/a42bdce6-2f31-4718-bb5a-3b29cb9bd893)
 
 :bust_in_silhouette: Users
 
-![image](https://github.com/user-attachments/assets/6879cf64-39bf-41af-a1ee-5363e10238c6)
+![user](https://github.com/user-attachments/assets/6879cf64-39bf-41af-a1ee-5363e10238c6)
 
 ### Exploratory Data Analysis (EDA)
 
 EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta distribusi rating. 
 - 10 penulis dengan jumlah buku terbanyak dianalisis, dengan Agatha Christie sebagai penulis teratas.
 
-![image](https://github.com/user-attachments/assets/a4250ae2-516d-4d95-97a1-2cdf9fc2c21b)
+![penulis](https://github.com/user-attachments/assets/a4250ae2-516d-4d95-97a1-2cdf9fc2c21b)
 
 - Distribusi rating menunjukkan mayoritas nilai berada dalam rentang tertentu.
 
 :pushpin: Rating Buku
 
-  ![image](https://github.com/user-attachments/assets/dd76d610-f95b-489b-99df-b5758115b5aa)
+  ![rating](https://github.com/user-attachments/assets/dd76d610-f95b-489b-99df-b5758115b5aa)
 
   :pushpin: Rating per Pengguna
   
-  ![image](https://github.com/user-attachments/assets/ce8ca0ff-1bca-4d2f-aaf6-d44368b18ac3)
+  ![pengguna](https://github.com/user-attachments/assets/ce8ca0ff-1bca-4d2f-aaf6-d44368b18ac3)
 
   Hasil EDA ini membantu dalam mempersiapkan data sebelum pemodelan. 🚀
 
 ## Data Preparation
+**1. Tahap Preprocessing**
 
 ✔ Cleaning Data: Menghapus nilai yang hilang dan duplikasi.
 
@@ -134,11 +135,19 @@ EDA dilakukan untuk memahami pola distribusi data, jumlah pengguna, buku, serta 
 
 ✔ Memfilter Data: Memilih hanya buku dengan jumlah rating cukup (minimal 5 review).
 
+**2. Tahap Pembagian Data (train-test-split)**
+
+✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering .
+
+**3. Tahap Ekstraksi Fitur**
+
 ✔ Ekstraksi Fitur dengan TF-IDF: Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
 
-✔ Persiapan Data untuk Collaborative Filtering: Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
+**4. Hasil Akhir**
 
 ✔ Hasil Akhir Data: Menampilkan dataset yang sudah dibersihkan dan siap digunakan untuk pemodelan.
+
+:pushpin: Tahap Preprocessing
 
 1️⃣ Cleaning Data (Menghapus duplikasi & nilai yang hilang)
 - Menghapus duplikasi pada dataset.
@@ -158,9 +167,9 @@ print("Missing Values setelah dibersihkan:\n", books.isnull().sum())
 print("Data setelah menghapus missing values:", books.shape)
 
 ```
-:pushpin: Terdapat missing value di bagian Book-Author dan Publisher.
+:exclamation: Terdapat missing value di bagian Book-Author dan Publisher.
 
-![image](https://github.com/user-attachments/assets/39a96833-92ae-4b13-a27d-ea3cc687914c)
+![missing](https://github.com/user-attachments/assets/39a96833-92ae-4b13-a27d-ea3cc687914c)
 
 2️⃣ Menggabungkan Data (Rating + Books)
 - Menggabungkan data ratings dengan books berdasarkan ISBN agar setiap rating memiliki informasi buku yang sesuai.
@@ -170,7 +179,7 @@ print("Data setelah menghapus missing values:", books.shape)
 books = pd.merge(ratings, books, on='ISBN', how='left')
 books
 ```
-![image](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
+![gabung](https://github.com/user-attachments/assets/172dcad9-8b34-4e73-8789-7f8dbbe98cb2)
 
 3️⃣ Menangani Missing Values Setelah Penggabungan
 - Mengecek kembali apakah ada missing values setelah penggabungan.
@@ -184,7 +193,7 @@ print("Missing Values:\n", books.isnull().sum())
 print("Data setelah menghapus missing values:", books.shape)
 ```
 
-![image](https://github.com/user-attachments/assets/066054ec-9cbb-4df1-878b-45a11881ea25)
+![value](https://github.com/user-attachments/assets/066054ec-9cbb-4df1-878b-45a11881ea25)
 
 4️⃣ Memfilter Data dengan Rating Cukup
 - Memastikan hanya buku yang memiliki minimal 5 rating yang digunakan agar data lebih valid.
@@ -200,27 +209,9 @@ print("Jumlah data setelah memfilter buku dengan minimal 5 rating:", books.shape
 ``
 Jumlah data setelah memfilter buku dengan minimal 5 rating: (670480, 7)
 ``
+:pushpin: Tahap Pembagian Data (train-test-split)
 
-5️⃣ Ekstraksi Fitur dengan TF-IDF
-
-- Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
-  
-```
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-tfidf = TfidfVectorizer(stop_words="english")
-tfidf_matrix = tfidf.fit_transform(books["Book-Title"])
-
-print("TF-IDF Matrix Shape:", tfidf_matrix.shape)
-```
-``
-TF-IDF Matrix Shape: (670480, 21731)
-``
-
-✔ **Hasil Ekstraksi TF-IDF**  
-* TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
-
-6️⃣ Persiapan Data untuk Collaborative Filtering
+5️⃣ Persiapan Data untuk Collaborative Filtering
 
 - Menggunakan Surprise SVD untuk membangun model rekomendasi berbasis Collaborative Filtering.
   
@@ -253,28 +244,30 @@ RMSE: 3.6694
 SVD with Surprise RMSE: 3.669365879489593
 ``
 
-📌 Hasil Evaluasi:
+:pushpin: Tahap Ekstraksi Fitur
 
-RMSE: 3.6694 menunjukkan performa model cukup baik dalam memprediksi rating buku.
+6️⃣  Ekstraksi Fitur dengan TF-IDF
 
-7️⃣ Rekomendasi Buku untuk Pengguna
-
-- Setelah model dibuat, kita bisa merekomendasikan buku berdasarkan rating prediksi.
-
+- Menggunakan TfidfVectorizer untuk mengubah data teks menjadi representasi numerik yang dapat digunakan untuk Content-Based Filtering.
+  
 ```
-# Contoh rekomendasi untuk user dengan ID 12345
-user_id = 12345
-recommended_books = get_book_recommendations(user_id, model, books)
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-print(f"Rekomendasi untuk User {user_id}: {recommended_books}")
+tfidf = TfidfVectorizer(stop_words="english")
+tfidf_matrix = tfidf.fit_transform(books["Book-Title"])
+
+print("TF-IDF Matrix Shape:", tfidf_matrix.shape)
 ```
-📌 Hasil Output:
-
 ``
-Rekomendasi untuk User 12345: ['0439425220', '0618002235', '0836213319', '0743454529', '0140143505']
+TF-IDF Matrix Shape: (670480, 21731)
 ``
 
-8️⃣ Hasil Akhir Data Setelah Dibersihkan
+✔ **Hasil Ekstraksi TF-IDF**  
+* TF-IDF menghasilkan **21.731 fitur unik**, yang berarti ada 21.731 kata berbeda yang muncul dalam judul buku setelah stopwords dihapus. Ini menunjukkan bahwa dataset memiliki keragaman yang cukup tinggi dalam judul buku.
+
+:pushpin: Hasil Akhir 
+
+7️⃣ Hasil Akhir Data Setelah Dibersihkan
 - Setelah semua tahapan data preparation dilakukan, dataset siap digunakan untuk pemodelan rekomendasi.
 ```
 print("\nJumlah data setelah pembersihan:")
@@ -283,7 +276,7 @@ print(f"Users: {users.shape[0]} baris")
 print(f"Ratings: {ratings.shape[0]} baris")
 ```
 
-![image](https://github.com/user-attachments/assets/b75b4979-04b1-411b-a2c2-13c49a22e132)
+![hasil](https://github.com/user-attachments/assets/b75b4979-04b1-411b-a2c2-13c49a22e132)
 
 :pushpin: Kesimpulan
 
@@ -361,8 +354,18 @@ cross_validate(model, data, cv=5, verbose=True)
 
 ![image](https://github.com/user-attachments/assets/2c77c76c-da63-402a-9496-0fa5889d7ec5)
 
-### ▶ **Hasil Rekomendasi Buku**
-- Top-N Rekomendasi Buku (Collaborative Filtering - SVD)
+ ▶ **Hasil Rekomendasi Buku**
+ - Top-N Rekomendasi Buku (Content-Based Filtering)
+   
+    | ISBN | Book-Title |	Book-Author |
+    | ---- | ---------- | ----------- |
+    | 80416 | Make Them Cry	| Kevin O'Brien |
+    | 620850 | Make Them Cry | Kevin O'Brien |
+    | 162070	| Make Them Cry	| Kevin O'Brien |
+    | 15	| Make Them Cry	| Kevin O'Brien |
+    | 355727	| Make Them Cry	| Kevin O'Brien |
+   
+  - Top-N Rekomendasi Buku (Collaborative Filtering - SVD)
   
   | Judul Buku | ISBN | Prediced Rating |
   | ------ | ----- | ------ |
@@ -388,7 +391,7 @@ cross_validate(model, data, cv=5, verbose=True)
 * Metrik evaluasi yang digunakan: Precision@K dan Recall@K untuk mengukur relevansi rekomendasi.
 
 Formula Cosine Similarity:
-![image](https://github.com/user-attachments/assets/ec77fda9-1bb1-4ba8-af12-2084a70cdd28)
+![formula](https://github.com/user-attachments/assets/ec77fda9-1bb1-4ba8-af12-2084a70cdd28)
 
 Hasil Evaluasi:
 
@@ -398,7 +401,7 @@ Hasil Evaluasi:
 
 📌 Recall@K: 0.5, menunjukkan bahwa 50% dari buku yang relevan berhasil ditemukan oleh sistem rekomendasi.
 
-![image](https://github.com/user-attachments/assets/346525ac-5d69-415b-8d88-5210fad1b992)
+![cbf](https://github.com/user-attachments/assets/346525ac-5d69-415b-8d88-5210fad1b992)
 
 Kesimpulan:
 
@@ -440,9 +443,9 @@ Hasil evaluasi RMSE: 1.2406, menunjukkan performa model cukup baik.
   
 💡 Formula RMSE:
 
-![image](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
+![rmse](https://github.com/user-attachments/assets/a05c80de-f628-420f-9d0b-f699982a97ae)
 
-![image](https://github.com/user-attachments/assets/0916d84a-4789-47b6-b49c-3417e9ff886c)
+![hasil](https://github.com/user-attachments/assets/0916d84a-4789-47b6-b49c-3417e9ff886c)
 
 💡 Visualisasi Evaluasi
 
@@ -452,7 +455,7 @@ Berdasarkan grafik RMSE:
 
 ✔ **Validation RMSE tetap tinggi dan cenderung stabil**, menunjukkan kemungkinan **overfitting**.
 
-![image](https://github.com/user-attachments/assets/78d4ae61-5ef1-4e46-9ba7-dbf00ec7fc68)
+![visual](https://github.com/user-attachments/assets/78d4ae61-5ef1-4e46-9ba7-dbf00ec7fc68)
 
 📊 Rekomendasi:
 * Perlu dilakukan tuning hyperparameter lebih lanjut.
